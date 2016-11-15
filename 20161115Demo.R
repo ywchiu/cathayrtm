@@ -84,3 +84,21 @@ tb <- table(unlist(bigram.all))
 
 tb[tb > 2]
 
+## 移除關鍵字
+
+s ="當初中央政府拿台北市的精華地跟北市府交換"
+s.split <- strsplit(s, '台北市')
+unlist(s.split)
+paste(unlist(s.split), collapse='')
+
+
+## 建立移除關鍵字函式
+removekey <-function(s, keys){
+  for(key in keys){
+    s.split=strsplit(s, key)
+    s =paste(unlist(s.split), collapse ="")
+  }
+  s
+}
+
+removekey("當初中央政府拿台北市的精華地跟北市府交換", c("台北市", "中央", "政府"))
