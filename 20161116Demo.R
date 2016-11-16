@@ -141,5 +141,31 @@ s.corpus <- Corpus(VectorSource(s.vec))
 s.dtm    <- DocumentTermMatrix(s.corpus, control=list(wordLengths=c(1, 20)))
 inspect(s.dtm)
 
-### 產生1,500篇文章詞頻矩陣
+## 產生1,500篇文章詞頻矩陣
 download.file('https://raw.githubusercontent.com/ywchiu/rtibame/master/data/applenews20160925.RData', destfile = 'appledaily.RData')
+load('appledaily.RData')
+View(applenews)
+str(applenews)
+
+
+## 或可以自製Transformer
+removeen <- content_transformer(
+  function(x, pattern){
+    return(x[grepl('^[\u4e00-\u9fa5]+$',x)])
+  }
+)
+
+library(jiebaR)
+mixseg    <- worker(user = '/home/trainee/user50/user.dict.utf8')
+apple.seg <- lapply(applenews$article, function(e) mixseg <= e)
+s.corpus  <- Corpus(VectorSource(apple.seg))
+doc       <- tm_map(s.corpus, removeNumbers)
+doc       <- tm_map(doc, removeen)
+s.dtm     <- DocumentTermMatrix(doc, control=list(wordLengths=c(2,Inf)))
+#inspect(s.dtm[1,1])
+dim(s.dtm)
+s.dtm$dimnames$Terms
+
+## 詞頻矩陣操作
+findFreqTerms(s.dtm, lowfreq = 200 )
+findAssocs(s.dtm, "紐約", 0.9)
