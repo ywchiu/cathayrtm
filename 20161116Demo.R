@@ -16,3 +16,58 @@ library(wordcloud2)
 tb2 <- tb[(nchar(names(tb)) >= 2) &  tb >=2]
 tb3 <- tb2[grepl('[\u4e00-\u9fa5]+', names(tb2))] 
 wordcloud2(as.table(tb3), shape = 'star')
+
+
+
+## 計算 tf-idf
+a   <- c("a")
+abb <- c("a", "b", "b")
+abc <- c("a", "b", "c")
+D   <- list(a, abb, abc)
+
+### tfidf('a',a,D)
+tf  <- 1 /1
+idf <- log(3/3)
+tf * idf 
+
+### tfidf('b',abb,D)
+tf  <- 2/3
+idf <- log(3/2)
+tf * idf 
+
+### tfidf('b',abc,D)
+tf  <- 1/3
+idf <- log(3/2)
+tf * idf
+
+### tfidf('c',abc,D)
+tf  <- 1/3
+idf <- log(3/1)
+tf * idf
+
+
+### tfidf('a',abc,D)
+tf  <- 1/3
+idf <- log(3/3)
+tf * idf
+
+
+### 建立 tf-idf 計算函式
+a   <- c("a")
+abb <- c("a", "b", "b")
+abc <- c("a", "b", "c")
+D   <- list(a, abb, abc)
+
+t   <- 'a'
+d   <-  abc
+tfidf<-function(t,d, D){
+  tf  <- length(which(d == t)) / length(d)
+  idf <- log(length(D) / sum(sapply(D, function(d) t %in% d)))
+  tf * idf
+}
+
+tfidf('a',a,D)
+tfidf('a',abc,D)
+tfidf('b',abb,D)
+tfidf('b',abc,D)
+tfidf('c',abc,D)
