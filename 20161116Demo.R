@@ -142,7 +142,7 @@ s.dtm    <- DocumentTermMatrix(s.corpus, control=list(wordLengths=c(1, 20)))
 inspect(s.dtm)
 
 ## 產生1,500篇文章詞頻矩陣
-download.file('https://raw.githubusercontent.com/ywchiu/rtibame/master/data/applenews20160925.RData', destfile = 'appledaily.RData')
+download.file('https://raw.githubusercontent.com/ywchiu/rtibame/master/data/applenews.RData', destfile = 'appledaily.RData')
 load('appledaily.RData')
 View(applenews)
 str(applenews)
@@ -157,7 +157,7 @@ removeen <- content_transformer(
 
 library(jiebaR)
 mixseg    <- worker(user = '/home/trainee/user50/user.dict.utf8')
-apple.seg <- lapply(applenews$article, function(e) mixseg <= e)
+apple.seg <- lapply(applenews$content, function(e) mixseg <= e)
 s.corpus  <- Corpus(VectorSource(apple.seg))
 doc       <- tm_map(s.corpus, removeNumbers)
 doc       <- tm_map(doc, removeen)
@@ -168,4 +168,26 @@ s.dtm$dimnames$Terms
 
 ## 詞頻矩陣操作
 findFreqTerms(s.dtm, lowfreq = 200 )
-findAssocs(s.dtm, "紐約", 0.9)
+findAssocs(s.dtm, "坎城", 0.9)
+
+
+dtm.remove <- removeSparseTerms(s.dtm, 0.99)
+dtm.remove$dimnames$Terms
+
+
+## 計算文章之間的相似程度
+a <- c(1, 2, 2, 1, 1, 1, 0)
+b <- c(1, 2, 2, 1, 1, 2, 1)
+
+cosine_distance <- sum(a * b) / (sqrt(sum(a ^ 2 )) * sqrt(sum(b ^ 2 )))
+
+library(proxy)
+proxy::dist(rbind(a,b), method = 'cosine')
+dtm.dist <- proxy::dist(as.matrix(dtm.remove), method = 'cosine')
+dtm.mat  <- as.matrix(dtm.dist)
+dim(dtm.mat)
+
+cbind(
+applenews[dtm.mat[20,]< 0.5, 'title'],
+dtm.mat[dtm.mat[20,]< 0.5, 20]
+)
