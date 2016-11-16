@@ -129,3 +129,16 @@ e.vec    <- strsplit(c(e1, e2), ' ')
 e.corpus <- Corpus(VectorSource(e.vec))
 e.dtm    <- DocumentTermMatrix(e.corpus)
 inspect(e.dtm)
+
+
+##建立中文的詞頻矩陣
+library(jiebaR)
+mixseg=worker(user = '/home/trainee/user50/user.dict.utf8')
+s ="大巨蛋案對市府同仁下封口令？柯P否認"
+s1 ="柯P市府近來飽受大巨蛋爭議"
+s.vec    <- list(mixseg <= s, mixseg<= s1)
+s.corpus <- Corpus(VectorSource(s.vec))
+s.dtm    <- DocumentTermMatrix(s.corpus, control=list(wordLengths=c(1, 20)))
+inspect(s.dtm)
+s.vec
+
