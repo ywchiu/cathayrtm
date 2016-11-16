@@ -71,3 +71,40 @@ tfidf('a',abc,D)
 tfidf('b',abb,D)
 tfidf('b',abc,D)
 tfidf('c',abc,D)
+
+
+
+## tf-idf 實作
+
+library(jiebaR)
+mixseg <- worker(user = '/home/trainee/user50/user.dict.utf8')
+a <- '樂見川普實踐反恐政見　敘總統稱美「天然盟友」'
+b <- '川普當選美國總統，杜特蒂：不用再和美國吵架了'
+c <- '靠爸太明顯！川普女上節目曝自家手鐲挨轟'
+a1 <- mixseg <= a
+b1 <- mixseg <= b
+c1 <- mixseg <= c
+D <- list(a1,b1,c1)
+tfidf('川普', a1, D)
+
+sort(sapply(b1, function(t) tfidf(t, b1, D)), decreasing = TRUE)
+
+
+## 建立詞頻向量
+e3     <- 'Hello, I am David. I have taken over 100 courses ~~~' 
+e3.vec <- strsplit(e3, ' ')
+e3.corpus =Corpus(VectorSource(e3.vec))
+e3.dtm =DocumentTermMatrix(e3.corpus)
+inspect(e3.dtm)
+
+
+dtm=DocumentTermMatrix(e3.corpus, control=list(wordLengths=c(1, 20)))
+inspect(dtm)
+
+getTransformations()
+
+
+doc <- tm_map(e3.corpus, removeNumbers)
+doc <- tm_map(doc, removePunctuation)
+dtm <- DocumentTermMatrix(doc)
+inspect(dtm)
