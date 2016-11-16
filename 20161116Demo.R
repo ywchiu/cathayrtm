@@ -108,3 +108,24 @@ doc <- tm_map(e3.corpus, removeNumbers)
 doc <- tm_map(doc, removePunctuation)
 dtm <- DocumentTermMatrix(doc)
 inspect(dtm)
+
+
+## 或可以自製Transformer
+removetilde <- content_transformer(
+  function(x, pattern){
+    return(gsub("~", "", x))
+  }
+)
+
+
+doc <- tm_map(e3.corpus, removetilde)
+dtm <- DocumentTermMatrix(doc)
+inspect(dtm)
+
+## 建立詞頻矩陣
+e1 ='this is a book'
+e2 ='this is my car'
+e.vec    <- strsplit(c(e1, e2), ' ')
+e.corpus <- Corpus(VectorSource(e.vec))
+e.dtm    <- DocumentTermMatrix(e.corpus)
+inspect(e.dtm)
