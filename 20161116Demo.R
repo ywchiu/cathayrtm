@@ -183,6 +183,8 @@ cosine_distance <- sum(a * b) / (sqrt(sum(a ^ 2 )) * sqrt(sum(b ^ 2 )))
 
 library(proxy)
 proxy::dist(rbind(a,b), method = 'cosine')
+
+## 計算1,500 篇文章之間的相似程度
 dtm.dist <- proxy::dist(as.matrix(dtm.remove), method = 'cosine')
 dtm.mat  <- as.matrix(dtm.dist)
 dim(dtm.mat)
