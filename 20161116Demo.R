@@ -140,5 +140,6 @@ s.vec    <- list(mixseg <= s, mixseg<= s1)
 s.corpus <- Corpus(VectorSource(s.vec))
 s.dtm    <- DocumentTermMatrix(s.corpus, control=list(wordLengths=c(1, 20)))
 inspect(s.dtm)
-s.vec
 
+### 產生1,500篇文章詞頻矩陣
+download.file('https://raw.githubusercontent.com/ywchiu/rtibame/master/data/applenews20160925.RData', destfile = 'appledaily.RData')
