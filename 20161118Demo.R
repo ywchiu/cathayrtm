@@ -23,13 +23,24 @@ View(news)
 
 ## Jieba 切詞, 轉詞頻矩陣
 library(jiebaR)
+library(tm)
 str(news)
 news$V2     <- as.character(news$V2)
 news$V1     <- as.character(news$V1)
 mixseg      <- worker(user = '/home/trainee/user50/user.dict.utf8')
 news.seg    <- lapply(news$V2, function(e) mixseg <= e)
 news.corpus <- Corpus(VectorSource(news.seg))
-news.dtm    <- DocumentTermMatrix(news.corpus, control=list(wordLengths=c(2,Inf)))
+
+
+## 或可以自製Transformer
+removeen <- content_transformer(
+  function(x, pattern){
+    return(x[grepl('^[\u4e00-\u9fa5]+$',x)])
+  }
+)
+
+doc         <- tm_map(news.corpus, removeen)
+news.dtm    <- DocumentTermMatrix(doc, control=list(wordLengths=c(2,Inf)))
 news.dtm
 
 ## 計算文字距離
@@ -44,3 +55,26 @@ par(mfrow=c(1,1))
 plot(fit)
 cluster <- cutree(fit, 6)
 news[cluster == 1, 'V1']
+
+table(cluster)
+
+## 繪製分群文字雲
+library(wordcloud2)
+colsum.dtm <- colSums(as.matrix(news.dtm[cluster == 1, ]) )
+tb <- colsum.dtm[order(colsum.dtm, decreasing = TRUE)][1:100]
+wordcloud2(as.table(tb))
+
+
+
+
+## 繪製分群結果
+rect.hclust(fit, 6)
+
+
+## 找出相似文章
+news[order(news.mat[7,])[1:10], 'V1']
+article.query=function(idx){
+  news[news.mat[idx,] < 0.8, 'V1']
+}
+
+article.query(5)[1:10]
