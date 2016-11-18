@@ -93,7 +93,7 @@ View(applenews)
 str(applenews)
 
 ## 挑選娛樂與財經　
-apple.subset <- applenews[applenews$category%in%c('財經', '娛樂'),]
+apple.subset <- applenews[applenews$category%in%c('財經', '娛樂', '社會'),]
 
 
 ## 或可以自製Transformer
@@ -144,11 +144,15 @@ library(e1071)
 fit  <- naiveBayes(trainset, traintag)
 pred <- predict(fit, testset)
 
+dim(dtm.count)
+
 tb <- table(pred, testtag)
 (29 + 31) / (29 + 31 + 3)
 
 library(caret)
 confusionMatrix(tb)
+
+apple.subset[which((pred== '娛樂') & (testtag =='財經')),'title']
 
 ## 建立詞頻矩陣
 e1 ='this is a book'
