@@ -83,3 +83,85 @@ article.query=function(idx){
 }
 
 article.query(5)[1:10]
+
+# 使用naive bayes 做文章分類
+
+## 產生1,500篇文章詞頻矩陣
+download.file('https://raw.githubusercontent.com/ywchiu/rtibame/master/data/applenews.RData', destfile = 'appledaily.RData')
+load('appledaily.RData')
+View(applenews)
+str(applenews)
+
+## 挑選娛樂與財經　
+apple.subset <- applenews[applenews$category%in%c('財經', '娛樂'),]
+
+
+## 或可以自製Transformer
+removeen <- content_transformer(
+  function(x, pattern){
+    return(x[grepl('^[\u4e00-\u9fa5]+$',x)])
+  }
+)
+
+library(jiebaR)
+mixseg    <- worker(user = '/home/trainee/user50/user.dict.utf8')
+apple.seg <- lapply(apple.subset$content, function(e) mixseg <= e)
+s.corpus  <- Corpus(VectorSource(apple.seg))
+
+## 字詞的清理
+doc       <- tm_map(s.corpus, removeNumbers)
+doc       <- tm_map(doc, removeen)
+dtm       <- DocumentTermMatrix(doc, control=list(wordLengths=c(2,Inf)))
+dtm
+
+## 挑選詞頻大於五的
+ft<-findFreqTerms(dtm, 5)
+control.list <- list(wordLengths=c(2,Inf),dictionary=ft)
+new.dtm <- DocumentTermMatrix(Corpus(VectorSource(doc)),control=control.list)
+new.dtm
+
+## 只列出是否有對到該詞的
+dtm.count<-apply(new.dtm, MARGIN =2, convert_counts)
+dim(dtm.count)
+
+## 將資料列為訓練跟測試資料集
+set.seed(123)
+idx <- sample.int(2, nrow(dtm.count),replace=TRUE, prob = c(0.7, 0.3))
+table(idx)
+
+### 訓練跟測試資料集Feature
+m <- as.data.frame(dtm.count)
+trainset <- m[idx == 1, ]
+testset  <- m[idx == 2, ]
+
+### 訓練跟測試資料集Label
+traintag <- as.factor(apple.subset[idx == 1, 'category'])
+testtag  <- as.factor(apple.subset[idx == 2, 'category'])
+
+
+## 做機器學習
+library(e1071)
+fit  <- naiveBayes(trainset, traintag)
+pred <- predict(fit, testset)
+
+tb <- table(pred, testtag)
+(29 + 31) / (29 + 31 + 3)
+
+library(caret)
+confusionMatrix(tb)
+
+## 建立詞頻矩陣
+e1 ='this is a book'
+e2 ='this is my car'
+e.vec    <- strsplit(c(e1, e2), ' ')
+e.corpus <- Corpus(VectorSource(e.vec))
+e.dtm    <- DocumentTermMatrix(e.corpus)
+inspect(e.dtm)
+
+convert_counts <- function(x){
+  x <-ifelse(x > 0, 1, 0)
+  x <-factor(x, levels=c(0, 1), labels=c("No", "Yes"))
+  return(x)
+}
+
+apply(e.dtm, MARGIN =2, convert_counts)
