@@ -49,7 +49,7 @@ news.dist <- proxy::dist(as.matrix(news.dtm), method = 'cosine')
 news.mat  <- as.matrix(news.dist)
 dim(news.mat)
 
-## 文章分群
+## 文章分群(階層式)
 fit <- hclust(news.dist, method = "ward.D2")
 par(mfrow=c(1,1))
 plot(fit)
@@ -57,6 +57,11 @@ cluster <- cutree(fit, 6)
 news[cluster == 1, 'V1']
 
 table(cluster)
+
+## 文章分群(KMEANS)
+fit2 <- kmeans(news.dist, 6)
+fit2$cluster
+news[fit2$cluster ==6,  'V1']
 
 ## 繪製分群文字雲
 library(wordcloud2)
